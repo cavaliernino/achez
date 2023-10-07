@@ -13,12 +13,12 @@ Developed in Flutter, with initial compatibility for Android & Web. TODO: iOS.
 Dependencies: google_maps_flutter
 
 ### Android
-JVM target: 1.8
-API 34 (TODO: acomodar a la mejor para retrocompatibilidad)
+- JVM target: 1.8
+- API 34 (TODO: acomodar a la mejor para retrocompatibilidad)
 
 ## Backend
-Python 3.11.4
-Django 4.2.6
+- Python 3.11.4
+- Django 4.2.6
 
 ## Database
 PostgreSQL 15
