@@ -1,4 +1,4 @@
-package com.example.achez
+package com.panal.achez
 
 import io.flutter.embedding.android.FlutterActivity
 
