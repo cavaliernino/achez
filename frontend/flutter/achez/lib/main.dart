@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:achez/maps.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -67,9 +69,10 @@ class AchezHomePage extends StatefulWidget {
 
 class _AchezHomePageState extends State<AchezHomePage> {
   final Completer<GoogleMapController> _controller = Completer();
+  //Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
 
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+  static const CameraPosition _laPolvora = CameraPosition(
+    target: LatLng(-33.0826021, -71.6209753),
     zoom: 14.4746,
   );
 
@@ -79,15 +82,58 @@ class _AchezHomePageState extends State<AchezHomePage> {
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
 
+  void _getBoundaries(CameraPosition cameraPosition) {
+    // You can do whatever you want with cameraPosition here
+    // send boundaries
+    // get risk grid and interest points
+    // risk grid element: center, hexa-radius
+    // to determine risk grid: start on active fire and check wind, temp and humidity
+    // higher temp: higher risk
+    // 1 km extension grid in direction of high wind
+    // 11 grid elements on narrower screen dim
+    var decodedJsonResponse = json.decode(
+        '{"active_fire_points": [{"lat": -33.0832497, "lon": -71.6208988},{"lat": -33.082151, "lon": -71.619826}],"on_foot_batallions": [{"lat": -33.077449, "lon": -71.621194}], "truck_batallions": [{"lat": -33.082249, "lon": -71.619971}],"air_support": [{"lat": -33.075563, "lon": -71.595046}],"videos": [{"lat": -33.082094, "lon": -71.624532, "src": "fire_video.mp4"},], "risk_grid": [ {"lat": 0, "lon": 0, "radius": 1},{"lat": 0, "lon": 0, "radius": 1}]}');
+
+    List<dynamic> active_fire_points =
+        decodedJsonResponse["active_fire_points"];
+    List<dynamic> on_foot_batallions =
+        decodedJsonResponse["on_foot_batallions"];
+    List<dynamic> truck_batallions = decodedJsonResponse["truck_batallions"];
+    List<dynamic> air_support = decodedJsonResponse["air_support"];
+    List<dynamic> videos = decodedJsonResponse["videos"];
+    List<dynamic> risk_grid = decodedJsonResponse["risk_grid"];
+    /*active_fire_points.forEach((active_fire_point) {
+      var _active_fire_count = 1;
+      final markerId = MarkerId("active_fire_$_active_fire_count");
+      final Marker marker = Marker(
+        markerId: markerId,
+        position: LatLng(
+          active_fire_point['lat'],
+          active_fire_point['lon'],
+        ),
+        infoWindow: InfoWindow(title: markerIdVal, snippet: '*'),
+        onTap: () => _onMarkerTapped(markerId),
+        onDragEnd: (LatLng position) => _onMarkerDragEnd(markerId, position),
+        onDrag: (LatLng position) => _onMarkerDrag(markerId, position),
+      );
+      _active_fire_count++;
+      setState(() {
+        markers[markerId] = marker;
+      });
+    });*/
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
         mapType: MapType.hybrid,
-        initialCameraPosition: _kGooglePlex,
+        initialCameraPosition: _laPolvora,
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
+        //onCameraMove: _getBoundaries,
+        //markers: Set<Marker>.of(markers.values),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _goToTheLake,
@@ -97,9 +143,20 @@ class _AchezHomePageState extends State<AchezHomePage> {
     );
   }
 
+  bool _switch = true;
   Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+    if (_switch) {
+      final GoogleMapController controller = await _controller.future;
+      controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+    } else {
+      Widget b = const MapsDemo();
+      Navigator.of(context).push(MaterialPageRoute<void>(
+          builder: (_) => Scaffold(
+                appBar: AppBar(title: const Text("Maps examples")),
+                body: b,
+              )));
+    }
+    _switch = !_switch;
   }
 /*
   int _counter = 0;
